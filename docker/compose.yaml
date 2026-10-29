@@ -1,0 +1,11 @@
+services:
+  homeops:
+    image: filippogrande/homeops:latest
+    container_name: homeops
+    restart: unless-stopped
+    ports:
+      - "8090:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/applicazioni/yml/docker:/stacks
+      - ./config.yaml:/app/config.yaml:ro
