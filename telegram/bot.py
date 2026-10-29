@@ -17,12 +17,12 @@ HELP = (
 )
 
 
-def api_get(base: str, path: str, **kwargs):
-    return requests.get(f"{base}{path}", timeout=kwargs.pop("timeout", 30), **kwargs)
+def api_get(base: str, path: str) -> requests.Response:
+    return requests.get(f"{base}{path}", timeout=30)
 
 
-def api_post(base: str, path: str, **kwargs):
-    return requests.post(f"{base}{path}", timeout=kwargs.pop("timeout", 600), **kwargs)
+def api_post(base: str, path: str) -> requests.Response:
+    return requests.post(f"{base}{path}", timeout=900)
 
 
 def send(token: str, chat_id: int, text: str) -> None:
@@ -42,7 +42,7 @@ def handle_command(base: str, text: str) -> str:
     if command in {"/update", "/start", "/stop", "/restart"} and len(parts) >= 2:
         name = parts[1].lower()
         if command == "/update":
-            body = api_post(base, f"/api/services/{name}/update", timeout=900).json()
+            body = api_post(base, f"/api/services/{name}/update").json()
             if body.get("status") in {"updated", "up_to_date"}:
                 polls = body.get("polls", 0)
                 elapsed = body.get("elapsed_sec", 0)
@@ -70,7 +70,7 @@ def main() -> None:
             response = requests.get(
                 f"https://api.telegram.org/bot{token}/getUpdates",
                 params={"offset": offset, "timeout": POLL_TIMEOUT},
-                timeout=POLL_TIMEOUT + 10,
+                timeout=60,
             )
             for update in response.json().get("result", []):
                 offset = update["update_id"] + 1
