@@ -11,6 +11,10 @@ from shared.logging import get_logger
 logger = get_logger(__name__)
 
 POLL_TIMEOUT = 50
+HELP = (
+    "Comandi: /services | /update <servizio> | /start <servizio> | "
+    "/stop <servizio> | /restart <servizio>"
+)
 
 
 def api_get(base: str, path: str, **kwargs):
@@ -40,13 +44,15 @@ def handle_command(base: str, text: str) -> str:
         if command == "/update":
             body = api_post(base, f"/api/services/{name}/update", timeout=900).json()
             if body.get("status") in {"updated", "up_to_date"}:
-                return f"{name}: {body.get('status')} ({body.get('polls', 0)} poll, {body.get('elapsed_sec', 0):.0f}s)"
+                polls = body.get("polls", 0)
+                elapsed = body.get("elapsed_sec", 0)
+                return f"{name}: {body.get('status')} ({polls} poll, {elapsed:.0f}s)"
             return f"{name}: FALLITO - {body.get('detail', 'errore')}"
         response = api_post(base, f"/api/services/{name}{command}")
         if response.status_code >= 400:
             return f"{name}: errore {response.status_code}"
         return f"{name}: {response.json().get('result', 'ok')}"
-    return "Comandi: /services | /update <servizio> | /start <servizio> | /stop <servizio> | /restart <servizio>"
+    return HELP
 
 
 def main() -> None:
