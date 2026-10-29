@@ -38,7 +38,12 @@ def compose_cmd(config: Config, service: ServiceConfig, *args: str) -> list[str]
 
 def run(cmd: list[str], timeout: int) -> subprocess.CompletedProcess:
     logger.info("exec %s", " ".join(cmd))
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(cmd, 124, "", f"timeout after {timeout}s")
+    except FileNotFoundError as exc:
+        return subprocess.CompletedProcess(cmd, 127, "", f"command not found: {exc}")
 
 
 def parse_ps(stdout: str) -> list[dict]:
