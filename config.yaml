@@ -1,0 +1,26 @@
+# homeops - configurazione
+#
+# Montato nei container come /app/config.yaml.
+# I servizi si riferiscono a compose file sotto compose_root.
+
+compose_root: /stacks
+
+update:
+  poll_interval_sec: 30
+  timeout_sec: 300
+
+telegram:
+  enabled: false
+  bot_token: ""
+  chat_ids: []
+  api_base: http://127.0.0.1:8000
+
+services:
+  - name: nextcloud
+    compose_file: nextcloud/compose.yaml
+    url: http://10.0.0.5:8081
+    critical: true
+  - name: immich
+    compose_file: immich/compose.yaml
+    url: http://10.0.0.5:2283
+    critical: true
